@@ -1,0 +1,14 @@
+build/
+*.exe
+*.obj
+*.pdb
+.vs/
+CMakeFiles/
+cmake-build-*/
+__pycache__/
+*.pyc
+*.swp
+*.swo
+.git/
+.gitignore
+portfolio_snapshot.json
