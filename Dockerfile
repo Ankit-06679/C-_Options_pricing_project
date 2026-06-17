@@ -30,5 +30,7 @@ COPY --from=builder /src/build/options_pricer /usr/local/bin/options_pricer
 
 EXPOSE 8080
 
-ENTRYPOINT ["options_pricer"]
-CMD ["demo", "AAPL", "MSFT"]
+ENV API_KEY="demo"
+ENV SYMBOLS="AAPL"
+
+CMD options_pricer "$API_KEY" $SYMBOLS
