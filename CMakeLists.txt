@@ -40,6 +40,7 @@ target_link_libraries(options_pricer PRIVATE
     OpenSSL::Crypto
     nlohmann_json::nlohmann_json
     Threads::Threads
-    ws2_32
-    wsock32
 )
+if(WIN32)
+    target_link_libraries(options_pricer PRIVATE ws2_32 wsock32)
+endif()
