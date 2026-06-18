@@ -1071,7 +1071,7 @@ private:
             http::response<http::string_body> res;
 
             if (req_.method() == http::verb::get) {
-                std::string target = req_.target();
+                std::string target(req_.target());
 
                 if (target == "/") {
                     res = make_response(http::status::ok, HTML_PAGE, "text/html");
@@ -1158,7 +1158,7 @@ private:
                     res = make_response(http::status::not_found, "Not found", "text/plain");
                 }
             } else if (req_.method() == http::verb::post) {
-                std::string target = req_.target();
+                std::string target(req_.target());
                 if (target == "/api/pause") {
                     client_->pause();
                     res = json_response({{"status", "ok"}, {"paused", true}});
@@ -1331,7 +1331,7 @@ private:
         void do_write(http::response<http::string_body> res) {
             auto sp = std::make_shared<http::response<http::string_body>>(std::move(res));
             http::async_write(stream_, *sp,
-                [self = shared_from_this(), sp](beast::error_code ec, std::size_t) {
+                [self = shared_from_this(), sp](beast::error_code, std::size_t) {
                     beast::error_code ignored;
                     self->stream_.socket().shutdown(tcp::socket::shutdown_both, ignored);
                     self->stream_.close();
