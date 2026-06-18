@@ -1,3 +1,12 @@
+---
+title: Options Pricing Platform
+emoji: 📈
+colorFrom: blue
+colorTo: green
+sdk: docker
+pinned: false
+---
+
 # Options Pricing Platform
 
 A **production-grade C++20 web application** for pricing financial options using **Black-Scholes** (analytical baseline for European options) and **Monte Carlo simulation** (exotic path-dependent options: Asian, Barrier, Lookback). Features a real-time web dashboard with live SSE streaming, Greeks tracking, volatility surface heatmaps, convergence analysis, and 8 built-in option strategies.
