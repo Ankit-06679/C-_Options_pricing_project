@@ -22,7 +22,7 @@ FetchContent_Declare(
     GIT_TAG v3.11.3
 )
 
-set(CROW_USE_BOOST ON CACHE BOOL "Use Boost Asio")
+set(CROW_USE_BOOST OFF CACHE BOOL "Use Boost Asio")
 FetchContent_MakeAvailable(nlohmann_json)
 
 add_executable(options_pricer

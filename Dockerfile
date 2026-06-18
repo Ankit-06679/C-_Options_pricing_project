@@ -2,7 +2,7 @@
 FROM gcc:14.2-bookworm AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    cmake libboost-all-dev libssl-dev ca-certificates git \
+    cmake libboost-system-dev libssl-dev ca-certificates git \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
@@ -17,7 +17,7 @@ COPY Common.hpp ThreadSafeQueue.hpp Config.hpp \
 
 RUN mkdir build && cd build && \
     cmake .. -DCMAKE_BUILD_TYPE=Release && \
-    cmake --build . --parallel $(nproc)
+    cmake --build . --parallel 2
 
 # ── Runtime Stage ──
 FROM debian:bookworm-slim
