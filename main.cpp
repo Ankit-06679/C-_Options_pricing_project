@@ -1353,6 +1353,7 @@ private:
 
 // ── Main ──
 int main(int argc, char* argv[]) {
+    try {
     AppConfig config = AppConfig::from_cli(argc, argv);
     std::string api_key = (argc > 1) ? argv[1] : "demo";
     int port = static_cast<int>(config.port);
@@ -1363,16 +1364,22 @@ int main(int argc, char* argv[]) {
     unsigned int num_workers = std::max(1u, std::thread::hardware_concurrency());
 
     std::cout << "=== Options Pricing Platform v2.0 (Web) ===" << std::endl;
+    std::cout.flush();
     std::cout << "Symbols: ";
     for (size_t i = 0; i < config.symbols.size(); ++i) {
         if (i > 0) std::cout << ", ";
         std::cout << config.symbols[i];
     }
     std::cout << std::endl;
+    std::cout.flush();
     std::cout << "MC paths: " << config.mc_paths << std::endl;
+    std::cout.flush();
     std::cout << "Dashboard: http://localhost:" << port << std::endl;
+    std::cout.flush();
     std::cout << "API:       http://localhost:" << port << "/api/dashboard" << std::endl;
+    std::cout.flush();
     std::cout << "Press Ctrl+C to stop." << std::endl;
+    std::cout.flush();
 
     auto queue     = std::make_shared<ThreadSafeQueue<MarketTick>>();
     auto pm        = std::make_shared<PortfolioManager>();
@@ -1394,12 +1401,16 @@ int main(int argc, char* argv[]) {
     for (unsigned int i = 0; i < num_workers; ++i) {
         workers.emplace_back([queue, bs = bs_engine.get(), mc = mc_engine.get(), pm]() {
             while (!shutdown_requested.load()) {
-                MarketTick tick = queue->wait_and_pop();
-                if (shutdown_requested.load()) break;
-                if (tick.ticker.empty()) continue;
-                Greeks mc_g = mc->calculate(tick);
-                Greeks bs_g = bs->calculate(tick);
-                pm->update(mc_g, bs_g, tick);
+                try {
+                    MarketTick tick = queue->wait_and_pop();
+                    if (shutdown_requested.load()) break;
+                    if (tick.ticker.empty()) continue;
+                    Greeks mc_g = mc->calculate(tick);
+                    Greeks bs_g = bs->calculate(tick);
+                    pm->update(mc_g, bs_g, tick);
+                } catch (const std::exception& e) {
+                    std::cerr << "[Worker] error: " << e.what() << std::endl;
+                }
             }
         });
     }
@@ -1427,4 +1438,8 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Platform stopped." << std::endl;
     return 0;
+    } catch (const std::exception& e) {
+        std::cerr << "[Fatal] " << e.what() << std::endl;
+        return 1;
+    }
 }

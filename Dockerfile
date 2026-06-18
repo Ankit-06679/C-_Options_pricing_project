@@ -35,4 +35,4 @@ EXPOSE 7860
 ENV API_KEY="demo"
 ENV SYMBOLS="AAPL"
 
-CMD options_pricer "$API_KEY" $SYMBOLS --port 7860
+CMD options_pricer "$API_KEY" $SYMBOLS --port 7860 --mc-paths 5000
