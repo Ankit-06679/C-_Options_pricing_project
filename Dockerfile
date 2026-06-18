@@ -28,9 +28,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=builder /src/build/options_pricer /usr/local/bin/options_pricer
 
-EXPOSE 8080
+EXPOSE 7860
 
 ENV API_KEY="demo"
 ENV SYMBOLS="AAPL"
 
-CMD options_pricer "$API_KEY" $SYMBOLS
+CMD options_pricer "$API_KEY" $SYMBOLS --port 7860
