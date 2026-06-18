@@ -26,6 +26,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libboost-system1.74.0 libssl3 ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy libstdc++ from builder (GCC 14.2) since bookworm has GCC 12.2
+COPY --from=builder /usr/local/lib64/libstdc++.so.6* /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /src/build/options_pricer /usr/local/bin/options_pricer
 
 EXPOSE 7860
