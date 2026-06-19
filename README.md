@@ -7,336 +7,327 @@ sdk: docker
 pinned: false
 ---
 
-# Options Pricing Platform
+# Options Pricing Platform — Complete Guide
 
-A **production-grade C++20 web application** for pricing financial options using **Black-Scholes** (analytical baseline for European options) and **Monte Carlo simulation** (exotic path-dependent options: Asian, Barrier, Lookback). Features a real-time web dashboard with live SSE streaming, Greeks tracking, volatility surface heatmaps, convergence analysis, and 8 built-in option strategies.
+## What Is This Project?
+
+This is a **real-time web application** that calculates the price of **financial options** — contracts that give you the right to buy or sell a stock at a fixed price in the future. It uses two mathematical methods:
+
+1. **Black-Scholes** (a precise formula for simple options)
+2. **Monte Carlo simulation** (runs thousands of random scenarios for complex options)
+
+The app fetches live stock prices (or generates realistic synthetic prices) and displays everything on an interactive dashboard in your browser.
 
 ---
 
 ## Objective
 
-Build a real-time, interactive options pricing and risk analytics platform accessible via web browser, demonstrating:
+Build a working, real-time options pricing and risk-analysis tool accessible from any web browser, to demonstrate:
 
-- **Black-Scholes** closed-form analytical pricing as the exact baseline for European options
-- **Monte Carlo** simulation for exotic options where no closed-form solution exists
-- **Convergence Analysis** — visual proof that MC prices approach BS prices as simulation paths increase
-- **Greeks calculation** — risk sensitivities (Delta, Gamma, Vega, Theta, Rho) for position management
-- **Option Strategies** — 8 multi-leg strategies with P&L at expiry diagrams
-- **Live streaming** — Server-Sent Events push dashboard updates every 3 seconds
-- **Real-world ingestion** — Alpha Vantage API integration with automatic synthetic pricing fallback
+- How option prices are calculated using math and simulation
+- How risk is measured (Delta, Gamma, Vega, etc.)
+- How different trading strategies behave
+- How Monte Carlo accuracy improves with more simulation paths
+- All with live updating data and interactive charts
 
 ---
+
+# How to Use the Platform
+
+Open the URL in your browser. You'll see a dark-themed dashboard with a toolbar at the top and four tabs below.
+
+## The Toolbar (Top Bar)
+
+| Button | What It Does |
+|--------|-------------|
+| **Pause / Resume** | Stops or restarts the live data feed |
+| **Reset** | Deletes all positions and starts fresh |
+| **Stocks** | Opens a window to choose which stocks to track |
+| **Strategies** | Opens a window to build multi-leg option strategies |
+| **CSV** | Downloads all your data as a spreadsheet file |
+| **JSON** | Downloads all your data as a JSON file (for developers) |
+| **PDF** | Generates a printable PDF report |
+
+The badge on the right shows **Running** or **Paused**, and the number of positions and symbols tracked.
+
+## Tab 1: Portfolio (Main Dashboard)
+
+This is the default tab. It shows the current state of all your option positions.
+
+### Greeks Cards (top-left box)
+Shows the overall risk numbers for your entire portfolio:
+
+- **Positions** — total number of option contracts
+- **Last Spot** — most recent stock price received
+- **Delta / Gamma / Vega / Theta / Rho** — risk measurements (explained in glossary)
+- **IV (avg)** — average implied volatility across all positions
+- **HV (annual)** — historical volatility (how much the stock actually moved)
+
+> Numbers are color-coded: green = positive, red = negative, gray = neutral.
+
+### P&L Summary (top-right box)
+- **Total Cost** — how much you paid for all positions
+- **Portfolio Value (BS)** — what your positions are worth now (Black-Scholes estimate)
+- **Unrealized P&L** — profit or loss (green = profit, red = loss)
+- **Ticker** — the last stock that was updated
+
+Below this is a **P&L chart** that updates live — a line showing how your profit/loss changes over time.
+
+### Risk Analytics (bottom-left)
+- **Sharpe Ratio** — risk-adjusted return (higher is better)
+- **VaR (95%)** — Value at Risk: the maximum you could lose 95% of the time
+- **VaR (99%)** — Value at Risk at 99% confidence
+- **Max Drawdown** — biggest drop from peak to trough
+
+#### Stress Scenarios
+- **Market Crash (-10%)** — what happens to your portfolio if all stocks drop 10%
+- **Vol Spike (+20%)** — what happens if volatility jumps 20%
+- **Rate Shock (+1%)** — what happens if interest rates rise 1%
+
+### Vol Surface Heatmap (bottom-right)
+A colored grid showing **implied volatility** across different strike prices and expiry dates for each stock. Darker colors = higher volatility. Helps you see which options are expensive or cheap.
+
+### Greeks Surface Table (full-width table)
+A sortable table showing each stock's total risk numbers. **Click any stock name** to expand its full option chain (all strikes, expiries, and their individual prices and Greeks).
+
+### Positions Table (below surface table)
+Shows the most recent 10 option positions with all details: ticker, spot price, strike price, expiry, type (CALL/PUT), Delta, Gamma, Vega, IV, and price. **Click column headers** to sort.
+
+> The data refreshes automatically every 3–5 seconds.
+
+## Tab 2: Convergence Analysis
+
+This tab demonstrates that **Monte Carlo simulation gets more accurate as you run more paths**.
+
+### How to use:
+1. Enter: Spot price, Strike price, Expiry (years), Interest rate (%), Volatility (%), Option type (Call/Put)
+2. Choose max paths (10K, 50K, 100K, 200K)
+3. Click **Run**
+
+### What you'll see:
+- A **table** showing MC price vs BS exact price at 7 different path counts (1K to 100K)
+- A **chart** showing MC prices converging toward the BS price line as paths increase
+- The **error** column shows MC price minus BS price (should approach zero)
+- The **std error** column shows the statistical uncertainty (should shrink)
+
+## Tab 3: Exotic Options
+
+Prices **path-dependent options** that can't be priced with a simple formula.
+
+### How to use:
+1. **Style** — choose Asian (average), Barrier, or Lookback
+2. **Option Type** — Call or Put
+3. **Ticker** — select a stock
+4. **Spot, Strike, Expiry, Rate, Vol** — enter the option parameters
+5. If **Barrier** is selected, also enter the Barrier price and direction (Down-and-Out / Up-and-Out)
+6. Click **Price**
+
+### What you'll see:
+- The calculated price (MC simulation result)
+- Delta risk measure
+- All input parameters shown for reference
+
+## Tab 4: Strategies
+
+Build and visualize **multi-leg option strategies** — combinations of multiple options that create specific profit/loss patterns.
+
+### How to use:
+1. Click **Build Strategy**
+2. Choose a **Strategy Type** from the dropdown
+3. Enter the required parameters (they change based on strategy type)
+4. Click **Build & View**
+
+### Strategy Types Explained:
+
+| Strategy | What It Is | When To Use |
+|----------|-----------|-------------|
+| **Covered Call** | Own stock + sell a call option | Earning extra income when you think the stock won't rise much |
+| **Protective Put** | Own stock + buy a put option | Protecting against a price drop (like insurance) |
+| **Straddle** | Buy both a call and a put at same strike | Expecting a big move but unsure which direction |
+| **Strangle** | Buy a put and a call at different strikes | Same as straddle but cheaper, needs bigger move |
+| **Bull Call Spread** | Buy a cheap call + sell an expensive call | Betting on a moderate price increase |
+| **Bear Put Spread** | Buy an expensive put + sell a cheap put | Betting on a moderate price decrease |
+| **Butterfly** | Complex 3-strike combination | Betting the price stays exactly where it is |
+| **Iron Condor** | Complex 4-strike combination | Betting the price stays within a range |
+
+### What you'll see:
+- A **P&L diagram** (chart showing profit/loss at different stock prices at expiry)
+- **Strategy info** — name, ticker, cost, risk numbers
+- **Legs** — each individual option in the strategy
+
+---
+
+# Terminology Glossary
+
+## Basic Stock Market Terms
+
+| Term | Simple Explanation |
+|------|--------------------|
+| **Stock** | A tiny piece of ownership in a company. If you own 1 share of Apple, you own a tiny fraction of Apple. |
+| **Ticker** | The short code for a stock (e.g., AAPL = Apple, TSLA = Tesla, MSFT = Microsoft) |
+| **Spot Price** | The current market price of a stock |
+| **Exchange** | The marketplace where stocks are traded (NASDAQ, NYSE, etc.) |
+
+## Option Terms
+
+| Term | Simple Explanation |
+|------|--------------------|
+| **Option** | A contract that gives you the right (but not obligation) to buy or sell a stock at a fixed price before a certain date |
+| **Call Option** | The right to **buy** a stock at a fixed price. You profit if the stock price goes up. |
+| **Put Option** | The right to **sell** a stock at a fixed price. You profit if the stock price goes down. |
+| **Strike Price (K)** | The fixed price at which you can buy (call) or sell (put) the stock |
+| **Expiry (T)** | The date when the option contract ends. After this, the option is worthless. |
+| **Premium** | The price you pay to buy an option |
+| **In-the-Money (ITM)** | An option that has value if exercised right now (call: stock price > strike, put: stock price < strike) |
+| **At-the-Money (ATM)** | Stock price is roughly equal to the strike price |
+| **Out-of-the-Money (OTM)** | An option with no value if exercised right now (call: stock price < strike, put: stock price > strike) |
+
+## Exotic Option Terms
+
+| Term | Simple Explanation |
+|------|--------------------|
+| **European Option** | A standard option — can only be used on the expiry date |
+| **Asian Option** | Price depends on the **average** stock price over the option's life, not just the final price |
+| **Barrier Option** | An option that **activates or disappears** if the stock price hits a certain level |
+| **Down-and-Out** | A barrier option that **becomes worthless** if the stock price falls below the barrier |
+| **Up-and-Out** | A barrier option that becomes worthless if the stock price rises above the barrier |
+| **Lookback Option** | Price is based on the **best** price reached during the option's life (the highest for a call, lowest for a put) |
+
+## Risk Measurement Terms (The Greeks)
+
+| Term | Symbol | Simple Explanation |
+|------|--------|--------------------|
+| **Delta** | Δ | How much the option price changes if the stock moves $1. A Delta of 0.5 means the option price moves $0.50 for every $1 move in the stock. |
+| **Gamma** | Γ | How much Delta itself changes when the stock moves. High Gamma means Delta changes quickly. |
+| **Vega** | ν | How much the option price changes if volatility goes up by 1%. Higher Vega = more sensitive to volatility. |
+| **Theta** | Θ | **Time decay** — how much value the option loses each day. Options lose value as expiry approaches. |
+| **Rho** | ρ | How much the option price changes if interest rates change by 1% |
+| **Implied Volatility (IV)** | IV | What the market thinks the future volatility will be. Higher IV = more expensive options. Think of it as "how uncertain is the market?" |
+| **Historical Volatility (HV)** | — | How much the stock actually moved in the past (measured from price history) |
+
+## Portfolio Analytics Terms
+
+| Term | Simple Explanation |
+|------|--------------------|
+| **P&L** | Profit and Loss — how much money you've made or lost |
+| **Sharpe Ratio** | A score that measures **return relative to risk**. Above 1 is good, above 2 is very good. Negative means you're losing money. |
+| **VaR (Value at Risk)** | The **worst expected loss** at a given confidence level. VaR 95% = $100 means there's a 5% chance you'll lose more than $100. |
+| **Max Drawdown** | The biggest drop from a peak to a low. A 40% max drawdown means at some point you were down 40% from the high. |
+| **Stress Scenario** | A "what if" calculation. What happens to your portfolio in a market crash, a volatility spike, or a rate hike? |
+
+## Pricing Method Terms
+
+| Term | Simple Explanation |
+|------|--------------------|
+| **Black-Scholes** | A mathematical formula that gives the exact theoretical price of a European option. It won a Nobel Prize. |
+| **Monte Carlo Simulation** | A computer runs **thousands of random scenarios** (simulated stock price paths) and averages the results to find the price. Named after the casino. |
+| **Convergence** | The phenomenon where Monte Carlo gets closer to the exact Black-Scholes price as you run more random scenarios |
+| **Standard Error** | A measure of how uncertain the Monte Carlo estimate is. Shrinks as you add more paths. |
+| **Antithetic Variates** | A trick to make Monte Carlo more accurate: for each random number, also use its negative. Gives ~2x accuracy for the same number of paths. |
+
+## Tech Terms
+
+| Term | Simple Explanation |
+|------|--------------------|
+| **API** | A way for programs to talk to each other. The app has an API that the web page talks to. |
+| **Endpoint** | A specific URL path that does one thing (e.g., `/api/dashboard` returns the portfolio data) |
+| **SSE (Server-Sent Events)** | A technology where the server pushes updates to the browser automatically, like a live feed |
+| **JSON** | A text format for data. Looks like: `{"price": 150.25, "delta": 0.65}` |
+| **CSV** | A spreadsheet format you can open in Excel |
+| **Docker** | A way to package the app so it runs the same way everywhere |
+| **Port** | A numbered "channel" the app listens on. Like a TV channel number but for internet traffic. |
+
+---
+
+# Technical Details (For Developers)
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                   Web Browser                        │
-│  Portfolio │ Convergence │ Exotic │ Strategies       │
-│  (Chart.js dashboard with SSE live updates)          │
-└─────────────────────┬───────────────────────────────┘
-                      │ HTTP / SSE
-┌─────────────────────▼───────────────────────────────┐
-│           Boost.Beast HTTP Server (main.cpp)         │
-│  REST API: /api/dashboard, /api/convergence,         │
-│  /api/exotic, /api/chain, /api/strategies, ...       │
-│  SSE: /api/stream (pushes JSON every 3s)             │
-└──┬──────────────┬──────────────┬───────────────────┘
-   │              │              │
-   ▼              ▼              ▼
-┌────────┐ ┌────────────┐ ┌──────────────┐
-│Alpha   │ │Portfolio   │ │PricingEngine │
-│Vantage │ │Manager     │ │              │
-│Client  │ │            │ │• Black-      │
-│        │ │• Positions │ │  Scholes     │
-│• HTTPS │ │• Greeks    │ │• Monte Carlo │
-│• Rate  │ │• Analytics │ │  (European)  │
-│  Limit │ │• Save/Load │ │• MC (Asian)  │
-│• Synth │ │• Export    │ │• MC (Barrier)│
-│  Price │ │  (CSV/JSON)│ │• MC (Lookbk) │
-└────────┘ └────────────┘ │• Convergence │
-                          └──────────────┘
+Web Browser (Chart.js dashboard)
+    ↕ HTTP / SSE
+Boost.Beast HTTP Server
+    ↕
+Alpha Vantage Client ← → ThreadSafe Queue ← → Worker Threads → Portfolio Manager
+    (fetches data)       (holds pending     (compute prices)   (stores results)
+                          ticks)
 ```
 
-### File Structure
+- **Alpha Vantage Client** fetches stock prices from the Alpha Vantage API every 12 seconds, generates 30 option positions per stock, and puts them in a queue
+- **Worker threads** pick up positions from the queue, compute prices using both Black-Scholes and Monte Carlo, and save the results
+- **HTTP Server** serves the web page and API data from the Portfolio Manager
 
-| File | Purpose |
-|------|---------|
-| `main.cpp` | Boost.Beast HTTP server, HTML dashboard, 17+ REST endpoints, SSE streaming |
-| `Common.hpp` | `OptionType`, `OptionStyle` enums, `MarketTick`, `Greeks` structs |
-| `PricingEngine.hpp/.cpp` | Black-Scholes engine + Monte Carlo engine (European, Asian, Barrier, Lookback) |
-| `AlphaVantageClient.hpp/.cpp` | HTTPS data ingestion with rate limiting and synthetic pricing fallback |
-| `PortfolioManager.hpp/.cpp` | Position tracking, BS Greeks, P&L analytics, save/load, CSV/JSON export |
-| `Strategy.hpp/.cpp` | 8 option strategies with P&L at expiry and combined Greeks |
-| `Config.hpp` | CLI argument parsing (`--mc-paths`, `--port`, `--calls-only`, etc.) |
-| `ThreadSafeQueue.hpp` | Thread-safe producer-consumer queue with shutdown support |
-| `Dockerfile` | Multi-stage build (gcc:14.2 → debian:bookworm-slim), port 8080 |
-
----
-
-## Black-Scholes Model
-
-The **Black-Scholes model** provides a closed-form analytical solution for pricing **European options** (exercisable only at expiry).
-
-### Assumptions
-- Underlying price follows **geometric Brownian motion** with constant drift and volatility
-- **Lognormal** distribution of returns
-- Constant risk-free interest rate
-- No dividends
-- No transaction costs or taxes
-- Continuous trading
-- European exercise (no early exercise)
-
-### Formulas
-
-**Call option price:**
-```
-C = S₀ · N(d₁) - K · e^(-rT) · N(d₂)
-```
-
-**Put option price:**
-```
-P = K · e^(-rT) · N(-d₂) - S₀ · N(-d₁)
-```
-
-Where:
-```
-d₁ = [ln(S₀/K) + (r + σ²/2)T] / (σ√T)
-d₂ = d₁ - σ√T
-```
-
-| Variable | Meaning |
-|----------|---------|
-| `S₀` | Current spot price of underlying asset |
-| `K` | Strike price of the option |
-| `T` | Time to expiry (in years) |
-| `r` | Risk-free interest rate |
-| `σ` | Volatility of underlying returns |
-| `N(·)` | Cumulative distribution function of standard normal |
-
-### Implementation
-
-In `PricingEngine::BlackScholesEngine`:
-- `price()` — computes exact BS price using `std::erfc` for the normal CDF
-- `greeks()` — computes analytical partial derivatives (delta, gamma, vega, theta, rho)
-- `implied_volatility()` — inverts BS price using Newton-Raphson with bisection fallback
-
----
-
-## Monte Carlo Simulation
-
-The **Monte Carlo engine** simulates thousands of random price paths and computes option payoffs, averaging them to estimate the fair price. It handles both European and exotic options.
-
-### Variance Reduction: Antithetic Variates
-
-For each random normal `z`, we also use `-z` to generate a paired path. This creates negative correlation between pairs, reducing estimator variance by ~50% for the same number of paths.
-
-### European Options (Monte Carlo)
+## CLI Arguments
 
 ```
-S_T = S₀ · exp((r - σ²/2) · T + σ · √T · z)
-Payoff(CALL) = max(S_T - K, 0)
-Payoff(PUT)  = max(K - S_T, 0)
-Price = e^(-rT) · average(payoff)
+options_pricer API_KEY [SYMBOLS...] [options]
+
+Options:
+  --mc-paths N      Number of Monte Carlo paths (default: 5000 on HF, 100000 local)
+  --rate-limit S    Seconds between API calls (default: 12)
+  --port P          HTTP server port (default: 8080)
+  --calls-only      Only generate CALL options
+  --puts-only       Only generate PUT options
+  --help            Show help
+
+Examples:
+  options_pricer API_KEY AAPL MSFT TSLA
+  options_pricer API_KEY AAPL --mc-paths 50000 --port 9090
 ```
-
-### Asian Options
-
-Payoff is based on the **arithmetic average** of prices along the path, not just the final price. Useful for commodities and averaging contracts.
-
-```
-For each path (52 steps):
-    avg = (S₀ + S₁ + ... + S₅₂) / 53
-    Payoff(CALL) = max(avg - K, 0)
-    Payoff(PUT)  = max(K - avg, 0)
-```
-
-### Barrier Options
-
-Payoff depends on whether the underlying price **touches a barrier level** during the option's life.
-
-- **Down-and-Out**: Option is **knocked out** (becomes worthless) if price falls below barrier
-- **Up-and-Out**: Option is knocked out if price rises above barrier
-
-```
-For each path (52 steps):
-    If any step price crosses the barrier → payoff = 0
-    Else → payoff = max(S_T - K, 0) for call
-```
-
-### Lookback Options
-
-Payoff is based on the **maximum or minimum** price reached during the option's life.
-
-- **Floating Strike Lookback Call**: `payoff = max(S_max - K, 0)`
-- **Floating Strike Lookback Put**: `payoff = max(K - S_min, 0)`
-
-### Convergence Analysis
-
-The `/api/convergence` endpoint runs MC at multiple path counts `[1K, 2K, 5K, 10K, 20K, 50K, 100K]` and compares each result to the exact BS price, demonstrating that **MC price → BS price** as `paths → ∞`, with standard error decreasing as `1/√N`.
-
-```
-error = mc_price - bs_price
-std_error = σ(payoffs) / √N
-```
-
----
-
-## The Greeks
-
-The **Greeks** measure the sensitivity of an option's price to various market parameters. All Greeks are stored per-position as BS analytical values (the baseline).
-
-| Greek | Symbol | Definition | Interpretation |
-|-------|--------|------------|----------------|
-| **Delta** | Δ | ∂V/∂S | Price change per $1 move in underlying |
-| **Gamma** | Γ | ∂²V/∂S² | Delta change per $1 move in underlying (convexity) |
-| **Vega** | ν | ∂V/∂σ | Price change per 1% change in volatility |
-| **Theta** | Θ | ∂V/∂T | Time decay — price change per day closer to expiry |
-| **Rho** | ρ | ∂V/∂r | Price change per 1% change in interest rate |
-| **Implied Vol** | IV | σ such that BS price = market price | Market's expectation of future volatility |
-
-### Portfolio-Level Analytics
-
-| Metric | Formula | Purpose |
-|--------|---------|---------|
-| **Sharpe Ratio** | (R̄ - Rf) / σ(R) | Risk-adjusted return (annualized) |
-| **VaR (95%/99%)** | Percentile of P&L distribution | Maximum loss at given confidence |
-| **Max Drawdown** | Peak-to-trough decline | Worst historical loss |
-| **Stress Crash** | P&L if spot drops 10% | Market crash scenario |
-| **Vol Spike** | P&L if IV rises 20% | Volatility shock scenario |
-| **Rate Shock** | P&L if rates rise 1% | Interest rate scenario |
-
----
-
-## Option Strategies
-
-8 built-in multi-leg option strategies, each with P&L at expiry diagrams and combined Greeks.
-
-| Strategy | Composition | Outlook |
-|----------|-------------|---------|
-| **Covered Call** | Long stock + Short call | Neutral to slightly bullish (income) |
-| **Protective Put** | Long stock + Long put | Bullish with downside protection |
-| **Straddle** | Long call + Long put (same strike) | High volatility / big move expected |
-| **Strangle** | Long call + Long put (different strikes) | High volatility / wider range |
-| **Bull Call Spread** | Long low-strike call + Short high-strike call | Moderately bullish (limited risk/reward) |
-| **Bear Put Spread** | Long high-strike put + Short low-strike put | Moderately bearish (limited risk/reward) |
-| **Butterfly** | Combination at 3 strikes (OTM call + 2×ATM call + ITM call) | Low volatility / range-bound |
-| **Iron Condor** | OTM put spread + OTM call spread | Low volatility / range-bound (credit) |
-
----
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/dashboard` | Full portfolio dashboard JSON |
-| GET | `/api/status` | Server status (symbols, positions, paused state) |
-| GET | `/api/stocks` | Global stock database (82 stocks, 12 countries) |
-| GET | `/api/countries` | List of available countries for filtering |
-| GET | `/api/stream` | SSE — pushes dashboard JSON every 3 seconds |
-| GET | `/api/chain?ticker=X` | Option chain for a given ticker |
-| GET | `/api/pl-diagram` | Portfolio-wide P&L at expiry curve |
-| GET | `/api/export/csv` | Download portfolio as CSV |
-| GET | `/api/export/json` | Download portfolio as JSON |
-| POST | `/api/configure` | Update symbols, strikes, expiries, calls/puts |
+| Method | Path | What it returns |
+|--------|------|-----------------|
+| GET | `/` | The HTML dashboard page |
+| GET | `/api/dashboard` | All portfolio data as JSON |
+| GET | `/api/status` | Running status (positions count, symbols, paused?) |
+| GET | `/api/stocks` | List of all 82 available stocks |
+| GET | `/api/countries` | List of 12 countries for filtering stocks |
+| GET | `/health` | Health check with uptime |
+| POST | `/api/configure` | Change tracked stocks (send JSON like `{"symbols":["AAPL","TSLA"]}`) |
 | POST | `/api/pause` | Pause data ingestion |
 | POST | `/api/resume` | Resume data ingestion |
 | POST | `/api/reset` | Clear all positions |
-| POST | `/api/convergence` | Run MC convergence analysis (returns chart data) |
-| POST | `/api/exotic` | Price exotic options (Asian/Barrier/Lookback) |
+| POST | `/api/convergence` | Run convergence analysis |
+| POST | `/api/exotic` | Price exotic options |
 | POST | `/api/strategy/build` | Build a multi-leg strategy |
-| GET | `/api/strategies/current` | Get built strategies |
-| POST | `/api/strategies/clear` | Clear all strategies |
-| POST | `/api/backtest` | Run MC vs BS backtest across volatility range |
+| POST | `/api/strategies/clear` | Clear built strategies |
+| POST | `/api/backtest` | Run MC vs BS comparison across volatilities |
+
+## Live Deployed URL
+
+**https://ankit3445-options-pricing.hf.space**
+
+## GitHub Repository
+
+**https://github.com/Ankit-06679/C-_Options_pricing_project**
 
 ---
 
-## Terminology Glossary
+## Source Files
 
-| Term | Definition |
-|------|------------|
-| **Option** | Financial contract giving the holder the right (not obligation) to buy/sell an asset at a specified price |
-| **Call Option** | Right to **buy** the underlying asset at the strike price |
-| **Put Option** | Right to **sell** the underlying asset at the strike price |
-| **European Option** | Exercisable only at expiry date |
-| **Asian Option** | Payoff determined by average price over the option's life |
-| **Barrier Option** | Activated/terminated when spot price hits a predetermined level |
-| **Lookback Option** | Payoff based on maximum or minimum price during the option's life |
-| **Strike Price (K)** | Pre-determined price at which the option can be exercised |
-| **Spot Price (S₀)** | Current market price of the underlying asset |
-| **Time to Expiry (T)** | Time remaining until option expiration (in years) |
-| **Risk-Free Rate (r)** | Theoretical return on a risk-free investment (government bond yield) |
-| **Volatility (σ)** | Standard deviation of the underlying asset's returns (annualized) |
-| **Implied Volatility (IV)** | Volatility implied by the market price via inverse Black-Scholes |
-| **Historical Volatility (HV)** | Actual realized volatility of the underlying over a past period |
-| **In-the-Money (ITM)** | Option with intrinsic value (call: S > K, put: S < K) |
-| **At-the-Money (ATM)** | Option where S ≈ K |
-| **Out-of-the-Money (OTM)** | Option with no intrinsic value (call: S < K, put: S > K) |
-| **Premium** | Price paid to purchase an option |
-| **P&L** | Profit and Loss on a position |
-| **SSE (Server-Sent Events)** | Unidirectional real-time data push over HTTP |
+| File | What It Contains |
+|------|------------------|
+| `main.cpp` | HTTP server, web page HTML/JS, REST API handlers, SSE streaming, threading setup |
+| `Common.hpp` | Shared data types (OptionType, MarketTick, Greeks) |
+| `Config.hpp` | CLI argument parsing |
+| `PricingEngine.hpp/.cpp` | Black-Scholes formula, Monte Carlo simulation (European, Asian, Barrier, Lookback) |
+| `PortfolioManager.hpp/.cpp` | Position storage, aggregated Greeks, P&L analytics, save/load, CSV/JSON export |
+| `Strategy.hpp/.cpp` | 8 option strategies with P&L calculation |
+| `AlphaVantageClient.hpp/.cpp` | HTTPS data ingestion from Alpha Vantage API, rate limiting, synthetic price fallback |
+| `ThreadSafeQueue.hpp` | Thread-safe queue with shutdown support |
+| `Dockerfile` | Build and deployment configuration for Docker / Hugging Face Spaces |
+| `CMakeLists.txt` | Build system configuration |
 
 ---
 
-## Quick Start
+## Technologies Used
 
-### Prerequisites
-- C++20 compiler (GCC 13+/Clang 16+)
-- Boost 1.83+ (system, asio, beast)
-- OpenSSL 3+
-- CMake 3.20+
-- nlohmann/json (fetched automatically by CMake)
-
-### Build
-```bash
-git clone https://github.com/Ankit-06679/C-_Options_pricing_project
-cd C-_Options_pricing_project
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build . --parallel $(nproc)
-```
-
-### Run
-```bash
-# Basic usage
-./options_pricer API_KEY AAPL MSFT TSLA
-
-# With options
-./options_pricer API_KEY AAPL --mc-paths 50000 --port 9090 --calls-only
-
-# Help
-./options_pricer --help
-```
-
-### Docker
-```bash
-docker build -t options-pricer .
-docker run -d -p 8080:8080 options-pricer API_KEY AAPL TSLA
-```
-
-Then open **http://localhost:8080** in your browser.
-
----
-
-## Dashboard Tabs
-
-| Tab | Description |
-|-----|-------------|
-| **Portfolio** | BS Greeks grid, P&L history chart, risk analytics, volatility surface heatmap, expandable option chain |
-| **Convergence** | MC→BS convergence scatter plot + error table across path counts 1K–100K |
-| **Exotic** | Price Asian, Barrier, and Lookback options with MC simulation |
-| **Strategies** | Build 8 multi-leg strategies with interactive P&L diagram |
-
----
-
-## Technologies
-
-- **C++20** — `std::jthread`, smart pointers, structured bindings, `constexpr`
-- **Boost.Beast** — HTTP/1.1 server, WebSocket, SSL/TLS
-- **Boost.Asio** — networking, timers, `io_context`
-- **nlohmann/json** — JSON serialization/deserialization
-- **OpenSSL** — HTTPS client connections
-- **Chart.js** — Client-side charts (realtime P&L, convergence scatter, P&L diagrams)
-- **Server-Sent Events** — Real-time dashboard updates
-- **Docker** — Multi-stage build for deployment
-- **CMake** — Build system with `FetchContent`
+- **C++20** — latest C++ standard
+- **Boost.Beast + Boost.Asio** — HTTP server and networking
+- **OpenSSL** — secure HTTPS connections to Alpha Vantage
+- **nlohmann/json** — JSON parsing and generation
+- **Chart.js** — browser-based interactive charts
+- **Docker** — containerized deployment
+- **CMake** — build system
