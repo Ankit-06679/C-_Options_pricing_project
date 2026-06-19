@@ -5,6 +5,7 @@
 #include <atomic>
 #include <csignal>
 #include <cstdlib>
+#include <ctime>
 #include <algorithm>
 #include <chrono>
 #include <sstream>
@@ -33,6 +34,7 @@ namespace net    = boost::asio;
 using tcp        = net::ip::tcp;
 
 static std::atomic<bool> shutdown_requested{false};
+static std::time_t global_startup_time = 0;
 
 extern "C" void signal_handler(int) {
     shutdown_requested.store(true);
@@ -980,8 +982,10 @@ private:
             if (ec || shutdown_requested.load()) { self->stop(); return; }
             std::string body = self->pm_->to_json().dump();
             std::string data = "data: " + body + "\n\n";
+            self->stream_.expires_after(std::chrono::seconds(10));
             net::async_write(self->stream_, net::buffer(data),
                 [self](beast::error_code ec, std::size_t) {
+                    self->stream_.expires_after(std::chrono::seconds(0));
                     if (!ec) self->send_events();
                     else self->stop();
                 });
@@ -1080,6 +1084,8 @@ private:
                     auto sse = std::make_shared<SSESession>(std::move(stream_), pm_);
                     sse->start();
                     return; // Don't go through normal do_write
+                } else if (target == "/health") {
+                    res = json_response({{"status","ok"},{"uptime", std::time(nullptr) - global_startup_time}});
                 } else if (target == "/api/dashboard") {
                     res = json_response(pm_->to_json());
                 } else if (target == "/api/status") {
@@ -1357,6 +1363,8 @@ int main(int argc, char* argv[]) {
     AppConfig config = AppConfig::from_cli(argc, argv);
     std::string api_key = (argc > 1) ? argv[1] : "demo";
     int port = static_cast<int>(config.port);
+
+    global_startup_time = std::time(nullptr);
 
     std::signal(SIGINT,  signal_handler);
     std::signal(SIGTERM, signal_handler);
