@@ -1,8 +1,5 @@
----
+﻿---
 title: Options Pricing Platform
-emoji: 📈
-colorFrom: blue
-colorTo: green
 sdk: docker
 pinned: false
 ---
@@ -33,8 +30,7 @@ Build a working, real-time options pricing and risk-analysis tool accessible fro
 ---
 
 # How to Use the Platform
-
-Open the URL in your browser. You'll see a dark-themed dashboard with a toolbar at the top and four tabs below.
+.
 
 ## The Toolbar (Top Bar)
 
@@ -331,3 +327,4 @@ Examples:
 - **Chart.js** — browser-based interactive charts
 - **Docker** — containerized deployment
 - **CMake** — build system
+

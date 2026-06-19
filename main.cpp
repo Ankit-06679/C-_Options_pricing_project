@@ -1186,6 +1186,7 @@ private:
                                 symbols.push_back(s.get<std::string>());
                             }
                             client_->set_symbols(symbols);
+                            client_->resume();
                             client_->request_reset();
                             pm_->reset();
                             res = json_response({{"status", "ok"}, {"symbols", symbols}});
