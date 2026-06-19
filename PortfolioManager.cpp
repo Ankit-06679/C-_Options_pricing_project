@@ -341,7 +341,9 @@ nlohmann::json PortfolioManager::to_json() const {
     int totalCount = static_cast<int>(positions_.size());
 
     std::unordered_map<std::string, nlohmann::json> tickerData;
+    std::unordered_map<std::string, int> tickerPosCount;
     std::unordered_map<std::string, std::vector<nlohmann::json>> tickerPositions;
+    static constexpr int MAX_POS_PER_TICKER = 20;
 
     for (const auto& p : positions_) {
         mcDelta += p.mc.delta; mcGamma += p.mc.gamma; mcVega += p.mc.vega;
@@ -373,19 +375,23 @@ nlohmann::json PortfolioManager::to_json() const {
         td["cost"]           = td.value("cost", 0.0) + p.entryMarketPrice;
         tickerData[p.ticker] = td;
 
-        tickerPositions[p.ticker].push_back({
-            {"spot",       p.spotPrice},
-            {"strike",     p.strikePrice},
-            {"expiry",     p.timeToExpiry},
-            {"type",       p.optionType == OptionType::CALL ? "CALL" : "PUT"},
-            {"mc_price",   p.mc.price},   {"mc_delta", p.mc.delta},
-            {"mc_gamma",   p.mc.gamma},   {"mc_vega",  p.mc.vega},
-            {"mc_theta",   p.mc.theta},   {"mc_iv",    p.mc.impliedVol},
-            {"bs_price",   p.bs.price},   {"bs_delta", p.bs.delta},
-            {"bs_gamma",   p.bs.gamma},   {"bs_vega",  p.bs.vega},
-            {"bs_theta",   p.bs.theta},   {"bs_iv",    p.bs.impliedVol},
-            {"entry_price", p.entryMarketPrice}
-        });
+        int& pcnt = tickerPosCount[p.ticker];
+        if (pcnt < MAX_POS_PER_TICKER) {
+            tickerPositions[p.ticker].push_back({
+                {"spot",       p.spotPrice},
+                {"strike",     p.strikePrice},
+                {"expiry",     p.timeToExpiry},
+                {"type",       p.optionType == OptionType::CALL ? "CALL" : "PUT"},
+                {"mc_price",   p.mc.price},   {"mc_delta", p.mc.delta},
+                {"mc_gamma",   p.mc.gamma},   {"mc_vega",  p.mc.vega},
+                {"mc_theta",   p.mc.theta},   {"mc_iv",    p.mc.impliedVol},
+                {"bs_price",   p.bs.price},   {"bs_delta", p.bs.delta},
+                {"bs_gamma",   p.bs.gamma},   {"bs_vega",  p.bs.vega},
+                {"bs_theta",   p.bs.theta},   {"bs_iv",    p.bs.impliedVol},
+                {"entry_price", p.entryMarketPrice}
+            });
+        }
+        ++pcnt;
     }
 
     if (totalCount > 0) {
